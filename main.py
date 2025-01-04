@@ -11,12 +11,12 @@ from functions import nan_replace_t, calcul_metrici, salvare_matrice
 
 pd.set_option('display.float_format', '{:.3f}'.format)
 
-set_date = pd.read_csv("data_in/healthcare-dataset-stroke-data.csv", index_col=0)
+set_date = pd.read_csv("data_in/Stars.csv")
 # set_date = set_date[6000:]
 
 nan_replace_t(set_date)
 # predictori = list(set_date)[:-1]
-predictori = list(["age", "avg_glucose_level", "hypertension"])
+predictori = list(["Temperature","L","R","A_M"])
 tinta = list(set_date)[-1]
 
 # Prelucrare date
@@ -86,10 +86,10 @@ t_z = salvare_matrice(z, x_test.index,
                       ["z" + str(i + 1) for i in range(nr_discriminatori)],
                       "data_out/z.csv")
 t_zg = t_z.groupby(by=y_test.values).mean()
-for i in range(q - 1):
+for i in range(nr_discriminatori):
     plot_distributie(z, y_test, clase, i)
 if q > 2:
-    for i in range(1, q - 1):
+    for i in range(1, nr_discriminatori):
         scatter_scoruri(z, y_test, t_zg.values, clase, k2=i, etichete=x_test.index)
 
 # Testare
@@ -103,7 +103,7 @@ a_lda.to_csv("data_out/Acuratete_lda.csv")
 t_cm_lda.to_csv("data_out/Mat_conf.csv")
 
 # Predictie
-set_aplicare = pd.read_csv("data_in/healthcare-dataset-stroke-data.csv", index_col=0)
+set_aplicare = pd.read_csv("data_in/Stars.csv")
 
 print(set_aplicare[predictori])
 
