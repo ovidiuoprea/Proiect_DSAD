@@ -14,17 +14,18 @@ tinta = list(set_date)[-1]
 
 # Prelucrare date
 
-set_date["Gender"] = set_date["Gender"] == "Male"
+set_date["Gender"] = (set_date["Gender"] == "Male").astype(int)
 
 low_medium_high_mapping = {"Low": 1, "Medium": 2, "High": 3}
 set_date["Exercise Habits"] = set_date["Exercise Habits"].map(low_medium_high_mapping)
 
-set_date["Smoking"] = set_date["Smoking"] == "Yes"
-set_date["Family Heart Disease"] = set_date["Family Heart Disease"] == "Yes"
-set_date["Diabetes"] = set_date["Diabetes"] == "Yes"
-set_date["High Blood Pressure"] = set_date["High Blood Pressure"] == "Yes"
-set_date["Low HDL Cholesterol"] = set_date["Low HDL Cholesterol"] == "Yes"
-set_date["High LDL Cholesterol"] = set_date["High LDL Cholesterol"] == "Yes"
+set_date["Smoking"] = (set_date["Smoking"] == "Yes").astype(int)
+set_date["Family Heart Disease"] = (set_date["Family Heart Disease"] == "Yes").astype(int)
+set_date["Diabetes"] = (set_date["Diabetes"] == "Yes").astype(int)
+set_date["High Blood Pressure"] = (set_date["High Blood Pressure"] == "Yes").astype(int)
+set_date["Low HDL Cholesterol"] = (set_date["Low HDL Cholesterol"] == "Yes").astype(int)
+set_date["High LDL Cholesterol"] = (set_date["High LDL Cholesterol"] == "Yes").astype(int)
+
 
 set_date["Alcohol Consumption"] = set_date["Alcohol Consumption"].map(low_medium_high_mapping)
 set_date["Stress Level"] = set_date["Stress Level"].map(low_medium_high_mapping)
