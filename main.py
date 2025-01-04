@@ -6,30 +6,33 @@ from scipy.stats import f
 
 from functions import nan_replace_t
 
-set_date = pd.read_csv("data_in/heart_disease.csv")
+pd.set_option('display.float_format', '{:.3f}'.format)
+
+set_date = pd.read_csv("data_in/healthcare-dataset-stroke-data.csv",index_col=0)
+# set_date = set_date[6000:]
 
 nan_replace_t(set_date)
-predictori = list(set_date)[:-1]
+# predictori = list(set_date)[:-1]
+predictori=list(["age","avg_glucose_level","bmi","hypertension"])
 tinta = list(set_date)[-1]
 
 # Prelucrare date
 
-set_date["Gender"] = (set_date["Gender"] == "Male").astype(int)
-
-low_medium_high_mapping = {"Low": 1, "Medium": 2, "High": 3}
-set_date["Exercise Habits"] = set_date["Exercise Habits"].map(low_medium_high_mapping)
-
-set_date["Smoking"] = (set_date["Smoking"] == "Yes").astype(int)
-set_date["Family Heart Disease"] = (set_date["Family Heart Disease"] == "Yes").astype(int)
-set_date["Diabetes"] = (set_date["Diabetes"] == "Yes").astype(int)
-set_date["High Blood Pressure"] = (set_date["High Blood Pressure"] == "Yes").astype(int)
-set_date["Low HDL Cholesterol"] = (set_date["Low HDL Cholesterol"] == "Yes").astype(int)
-set_date["High LDL Cholesterol"] = (set_date["High LDL Cholesterol"] == "Yes").astype(int)
-
-
-set_date["Alcohol Consumption"] = set_date["Alcohol Consumption"].map(low_medium_high_mapping)
-set_date["Stress Level"] = set_date["Stress Level"].map(low_medium_high_mapping)
-set_date["Sugar Consumption"] = set_date["Sugar Consumption"].map(low_medium_high_mapping)
+# set_date["Gender"] = (set_date["Gender"] == "Male").astype(int)
+#
+# low_medium_high_mapping = {"Low": 1, "Medium": 2, "High": 3}
+# set_date["Exercise Habits"] = set_date["Exercise Habits"].map(low_medium_high_mapping)
+#
+# set_date["Smoking"] = (set_date["Smoking"] == "Yes").astype(int)
+# set_date["Family Heart Disease"] = (set_date["Family Heart Disease"] == "Yes").astype(int)
+# set_date["Diabetes"] = (set_date["Diabetes"] == "Yes").astype(int)
+# set_date["High Blood Pressure"] = (set_date["High Blood Pressure"] == "Yes").astype(int)
+# set_date["Low HDL Cholesterol"] = (set_date["Low HDL Cholesterol"] == "Yes").astype(int)
+# set_date["High LDL Cholesterol"] = (set_date["High LDL Cholesterol"] == "Yes").astype(int)
+#
+# set_date["Alcohol Consumption"] = set_date["Alcohol Consumption"].map(low_medium_high_mapping)
+# set_date["Stress Level"] = set_date["Stress Level"].map(low_medium_high_mapping)
+# set_date["Sugar Consumption"] = set_date["Sugar Consumption"].map(low_medium_high_mapping)
 
 #Impartire train/ test
 
@@ -58,7 +61,7 @@ b = g.T @ np.diag(f_) @ g
 w = t - b
 f_p = (np.diag(b) / (q - 1)) / (np.diag(w) / (n - q))
 p_values = 1 - f.cdf(f_p, q - 1, n - q)
-validare_predictori = p_values < 0.01
+validare_predictori = p_values < 0.05
 print(validare_predictori)
 t_predictori = pd.DataFrame(
     {
