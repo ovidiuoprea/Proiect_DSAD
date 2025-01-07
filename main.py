@@ -11,7 +11,7 @@ from functions import nan_replace_t, calcul_metrici, salvare_matrice
 
 pd.set_option('display.float_format', '{:.3f}'.format)
 
-set_date = pd.read_csv("data_in/Stars.csv")
+set_date = pd.read_csv("data_in/stars_train.csv")
 # set_date = set_date[6000:]
 
 nan_replace_t(set_date)
@@ -21,7 +21,7 @@ tinta = list(set_date)[-1]
 
 # Prelucrare date
 
-# set_date["Gender"] = (set_date["Gender"] == "Male").astype(int)
+# set_date["GENDER"] = (set_date["GENDER"] == "M").astype(int)
 #
 # low_medium_high_mapping = {"Low": 1, "Medium": 2, "High": 3}
 # set_date["Exercise Habits"] = set_date["Exercise Habits"].map(low_medium_high_mapping)
@@ -40,7 +40,7 @@ tinta = list(set_date)[-1]
 #Impartire train/ test
 
 x_train, x_test, y_train, y_test = (
-    train_test_split(set_date[predictori], set_date[tinta], test_size=0.3))
+    train_test_split(set_date[predictori], set_date[tinta], test_size=0.7))
 
 # Discriminarea liniara
 
@@ -64,7 +64,7 @@ b = g.T @ np.diag(f_) @ g
 w = t - b
 f_p = (np.diag(b) / (q - 1)) / (np.diag(w) / (n - q))
 p_values = 1 - f.cdf(f_p, q - 1, n - q)
-validare_predictori = p_values < 0.05
+validare_predictori = p_values < 0.01
 print(validare_predictori)
 t_predictori = pd.DataFrame(
     {
@@ -73,6 +73,9 @@ t_predictori = pd.DataFrame(
     }, index=predictori
 )
 t_predictori.to_csv("data_out/Predictori.csv")
+
+
+
 
 # giif not all(validare_predictori):
 #     print("Filtrare predictori!")
@@ -103,7 +106,7 @@ a_lda.to_csv("data_out/Acuratete_lda.csv")
 t_cm_lda.to_csv("data_out/Mat_conf.csv")
 
 # Predictie
-set_aplicare = pd.read_csv("data_in/Stars.csv")
+set_aplicare = pd.read_csv("data_in/stars_apply.csv")
 
 print(set_aplicare[predictori])
 
@@ -133,4 +136,4 @@ set_aplicare["Predictie Bayes"] = predictie_b
 
 set_aplicare.to_csv("data_out/Predictie.csv")
 
-show()
+# show()
