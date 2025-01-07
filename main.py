@@ -4,6 +4,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
 from scipy.stats import f
 from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
 
 from grafice import plot_distributie, show, scatter_scoruri
 
@@ -120,6 +121,13 @@ print(set_aplicare[predictori])
 
 predictie_lda = model_lda.predict(set_aplicare[predictori])
 set_aplicare["Predictie LDA"] = predictie_lda
+
+# y_real = tinta din setul de testare
+y_real = set_aplicare[tinta]
+print("y_real:", y_real)
+# acuratete pentru setul de testare
+acc_test = accuracy_score(y_real, predictie_lda)
+print(f"Acuratete pe setul de date de test: {acc_test:.2f}")
 
 # Discriminarea Bayesiana
 model_b = GaussianNB()
