@@ -5,12 +5,14 @@ from sklearn.model_selection import train_test_split
 from scipy.stats import f
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
+import seaborn as sns
 
 from grafice import plot_distributie, show, scatter_scoruri
 
 from functions import nan_replace_t, calcul_metrici, salvare_matrice
 
 pd.set_option('display.float_format', '{:.3f}'.format)
+culori = sns.color_palette("Spectral", as_cmap=True)
 
 set_date = pd.read_csv("data_in/stars_train.csv")
 
@@ -38,9 +40,9 @@ model_lda.fit(x_train, y_train)
 
 # Analiza pe setul de invatare
 clase = model_lda.classes_
-f_ = model_lda.priors_
+probabilitati_clase = model_lda.priors_
 print("Clasele si probabilitatile a priori asociate: ")
-print(clase, f_, "\n")
+print(clase, probabilitati_clase, "\n")
 n = len(x_train)
 m = len(predictori)
 q = len(clase)
@@ -48,7 +50,7 @@ q = len(clase)
 # Calcul putere de predictie predictori
 t = np.cov(x_train.values, rowvar=False)
 g = model_lda.means_ - np.mean(x_train.values, axis=0)
-b = g.T @ np.diag(f_) @ g
+b = g.T @ np.diag(probabilitati_clase) @ g
 w = t - b
 f_p = (np.diag(b) / (q - 1)) / (np.diag(w) / (n - q))
 p_values = 1 - f.cdf(f_p, q - 1, n - q)
@@ -74,10 +76,10 @@ t_z = salvare_matrice(z, x_test.index,
                       "data_out/z.csv")
 t_zg = t_z.groupby(by=y_test.values).mean()
 for i in range(nr_discriminatori):
-    plot_distributie(z, y_test, clase, i)
+    plot_distributie(z, y_test, clase, i,culori)
 if q > 2:
     for i in range(1, nr_discriminatori):
-        scatter_scoruri(z, y_test, t_zg.values, clase, k2=i, etichete=x_test.index)
+        scatter_scoruri(z, y_test, t_zg.values, clase, k2=i, etichete=x_test.index, culori=culori)
 
 #Calculare putere discriminare variabile discriminante
 f_values = []
