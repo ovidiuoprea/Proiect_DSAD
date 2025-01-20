@@ -13,53 +13,34 @@ from functions import nan_replace_t, calcul_metrici, salvare_matrice
 pd.set_option('display.float_format', '{:.3f}'.format)
 
 set_date = pd.read_csv("data_in/stars_train.csv")
-# set_date = set_date[6000:]
 
 nan_replace_t(set_date)
-# predictori = list(set_date)[:-1]
 predictori = list(["Temperature","L","R","A_M","Spectral_Class"])
 tinta = list(set_date)[-1]
-print(set_date["Spectral_Class"].unique())
 
 
 # Prelucrare date
-
+print("Prelucrare date:\n")
+print("Valori distincte posibile pentru Spectral Class: ")
+print(set_date["Spectral_Class"].unique(), "\n")
 spectral_class_mapping = {"M": 1, "A": 2, "F": 3, "B": 4, "O": 5, "K": 6, "G": 7}
 set_date["Spectral_Class"] = set_date["Spectral_Class"].map(spectral_class_mapping)
 
-
-# set_date["GENDER"] = (set_date["GENDER"] == "M").astype(int)
-#
-# low_medium_high_mapping = {"Low": 1, "Medium": 2, "High": 3}
-# set_date["Exercise Habits"] = set_date["Exercise Habits"].map(low_medium_high_mapping)
-#
-# set_date["Smoking"] = (set_date["Smoking"] == "Yes").astype(int)
-# set_date["Family Heart Disease"] = (set_date["Family Heart Disease"] == "Yes").astype(int)
-# set_date["Diabetes"] = (set_date["Diabetes"] == "Yes").astype(int)
-# set_date["High Blood Pressure"] = (set_date["High Blood Pressure"] == "Yes").astype(int)
-# set_date["Low HDL Cholesterol"] = (set_date["Low HDL Cholesterol"] == "Yes").astype(int)
-# set_date["High LDL Cholesterol"] = (set_date["High LDL Cholesterol"] == "Yes").astype(int)
-#
-# set_date["Alcohol Consumption"] = set_date["Alcohol Consumption"].map(low_medium_high_mapping)
-# set_date["Stress Level"] = set_date["Stress Level"].map(low_medium_high_mapping)
-# set_date["Sugar Consumption"] = set_date["Sugar Consumption"].map(low_medium_high_mapping)
-
 #Impartire train/ test
-
 x_train, x_test, y_train, y_test = (
     train_test_split(set_date[predictori], set_date[tinta], test_size=0.7))
 
 # Discriminarea liniara
 
 # Construire model
-
 model_lda = LinearDiscriminantAnalysis()
 model_lda.fit(x_train, y_train)
 
 # Analiza pe setul de invatare
 clase = model_lda.classes_
 f_ = model_lda.priors_
-print(clase, f_)
+print("Clasele si probabilitatile a priori asociate: ")
+print(clase, f_, "\n")
 n = len(x_train)
 m = len(predictori)
 q = len(clase)
@@ -72,7 +53,8 @@ w = t - b
 f_p = (np.diag(b) / (q - 1)) / (np.diag(w) / (n - q))
 p_values = 1 - f.cdf(f_p, q - 1, n - q)
 validare_predictori = p_values < 0.01
-print(validare_predictori)
+print("Semnificatia predictorilor - True = semnificativ, False = nesemnificativ")
+print(validare_predictori, "\n")
 t_predictori = pd.DataFrame(
     {
         "Putere discriminare": f_p,
@@ -82,13 +64,8 @@ t_predictori = pd.DataFrame(
 t_predictori.to_csv("data_out/Predictori.csv")
 
 
-
-
-# giif not all(validare_predictori):
-#     print("Filtrare predictori!")
-#     predictori = np.array(predictori)[validare_predictori]
-
 # Analiza grafica a modelului pe setul de testare
+# Scoruri discriminante:
 z = model_lda.transform(x_test)
 nr_discriminatori = min(q - 1, m)
 
@@ -101,6 +78,33 @@ for i in range(nr_discriminatori):
 if q > 2:
     for i in range(1, nr_discriminatori):
         scatter_scoruri(z, y_test, t_zg.values, clase, k2=i, etichete=x_test.index)
+
+#Calculare putere discriminare variabile discriminante
+f_values = []
+p_values = []
+
+for i in range(nr_discriminatori):
+    scoruri = z[:, i]
+    s_b = 0
+    s_w = 0
+    medie_globala = np.mean(scoruri)
+    for clasa in clase:
+        indices = (y_test == clasa)
+        scoruri_clasa = scoruri[indices]
+        medie_clasa = np.mean(scoruri_clasa)
+        s_b += len(scoruri_clasa) * (medie_clasa - medie_globala) ** 2
+        s_w += np.sum((scoruri_clasa - medie_clasa) ** 2)
+    f_value = (s_b / (q - 1)) / (s_w / (len(y_test) - q))
+    f_values.append(f_value)
+    p_value = 1 - f.cdf(f_value, q - 1, len(y_test) - q)
+    p_values.append(p_value)
+
+t_discriminare = pd.DataFrame({
+    "Variabila discriminanta": [f"z{i+1}" for i in range(nr_discriminatori)],
+    "Putere discriminare (F-value)": f_values,
+    "P_Value": p_values
+})
+t_discriminare.to_csv("data_out/Putere_discriminare.csv", index=False)
 
 # Testare - folosim modelul bazat pe LDA pentru ca are atat acuratetea globala mai mare, cat si indexul Cohen-Kappa mai bun
 y_ = model_lda.predict(x_test)
@@ -116,15 +120,12 @@ t_cm_lda.to_csv("data_out/Mat_conf.csv")
 set_aplicare = pd.read_csv("data_in/stars_apply.csv")
 set_aplicare["Spectral_Class"] = set_aplicare["Spectral_Class"].map(spectral_class_mapping)
 
-
-print(set_aplicare[predictori])
-
 predictie_lda = model_lda.predict(set_aplicare[predictori])
 set_aplicare["Predictie LDA"] = predictie_lda
 
-# y_real = tinta din setul de testare
+# Pentru ca valorile pentru accuracy sunt foarte mari, am presupus ca modelul poate fi overfitted
+# Tinta din setul de testare
 y_real = set_aplicare[tinta]
-print("y_real:", y_real)
 # acuratete pentru setul de testare
 acc_test = accuracy_score(y_real, predictie_lda)
 print(f"Acuratete pe setul de date de test: {acc_test:.2f}")
